@@ -87,5 +87,6 @@ def home():
                            scroll_to_result=scroll_to_result)
 
 if __name__ == '__main__':
-    # Geliştirme aşamasında debug=True kalsın, sunuma geçerken kapatabilirsin.
-    app.run(debug=True, port=5000)
+    # Render için portu dinamik olarak alıyoruz, yerelde 5000 kullanılır
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
