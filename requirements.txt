@@ -1,5 +1,4 @@
-flask==3.0.0
-tensorflow==2.16.1
+streamlit
+tensorflow-cpu
 numpy<2.0.0
-werkzeug==3.0.1
-gunicorn==21.2.0
+pillow

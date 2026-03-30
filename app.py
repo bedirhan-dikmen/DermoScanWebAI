@@ -1,97 +1,102 @@
-import os
-# RAM kullanımını ve logları minimize et
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-
+import streamlit as st
+import tensorflow as tf
+from PIL import Image
 import numpy as np
-from flask import Flask, render_template, request
-# TensorFlow'u sadece ihtiyaç anında (lazy load) kullanacak şekilde düzenleyebiliriz
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
-from werkzeug.utils import secure_filename
-from tensorflow.keras.applications.resnet_v2 import preprocess_input
+import os
 
-app = Flask(__name__)
+# --- SAYFA AYARLARI (Kriter 17: Estetik Görünüm) ---
+st.set_page_config(
+    page_title="DermoScan AI | Teşhis Destek Sistemi",
+    page_icon="🔬",
+    layout="wide"
+)
 
-# --- AYARLAR ---
-# Model dosyanın 'final_model_3class.keras' adıyla aynı klasörde olduğundan emin ol.
-MODEL_PATH = 'final_model_3class.keras' 
-model = load_model(MODEL_PATH)
+# --- MODEL YÜKLEME (RAM Tasarrufu İçin Cache Kullanımı) ---
+@st.cache_resource
+def load_my_model():
+    # Model dosya adının doğru olduğundan emin ol
+    model_path = 'final_model_3class.keras'
+    return tf.keras.models.load_model(model_path)
 
-UPLOAD_FOLDER = 'static/uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+try:
+    model = load_my_model()
+except Exception as e:
+    st.error(f"Model yüklenemedi! Lütfen dosya adını kontrol edin. Hata: {e}")
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Sınıf Etiketleri (Arayüzde daha profesyonel görünmesi için düzenlendi)
+# --- SINIF ETİKETLERİ VE RENKLER ---
 LABELS = {
-    0: "BENIGN (İyi Huylu)",
-    1: "MALIGNANT (Kötü Huylu - Riskli)",
-    2: "NORMAL DERİ / LEZYON YOK"
+    0: {"text": "BENIGN (İyi Huylu)", "color": "green"},
+    1: {"text": "MALIGNANT (Riskli / Kötü Huylu)", "color": "red"},
+    2: {"text": "NORMAL / LEZYON YOK", "color": "blue"}
 }
 
-def model_predict(img_path, model):
-    # 1. Resmi yükle ve ResNet boyutu olan 224x224'e getir (Kriter 6)
-    img = image.load_img(img_path, target_size=(224, 224))
-    x = image.img_to_array(img)
-    x = np.expand_dims(x, axis=0)
+# --- YAN PANEL: PROJE BİLGİLERİ (Kriter 1-5: Tanım ve Veri Seti) ---
+with st.sidebar:
+    st.title("🔬 Proje Hakkında")
+    st.info("""
+    **Problem Tanımı:** Deri kanserinin erken teşhisi için geliştirilmiş yapay zeka destekli analiz sistemi.
     
-    # 2. ResNetV2 için normalizasyon (-1 ile 1 arası) uygula (Kriter 6)
-    x = preprocess_input(x) 
-
-    # 3. Tahmin yap
-    preds = model.predict(x)
-    result_index = np.argmax(preds)
+    **Model Mimarisi:** ResNet50V2 (Transfer Learning)
     
-    # Güven oranını sayısal olarak al (Progress bar için %)
-    confidence_value = preds[0][result_index] * 100
+    **Veri Seti:** 3 Sınıflı dermatoskopik görüntüler (224x224 piksel).
+    """)
+    st.divider()
+    st.write("© 2026 Akademik Sunum")
+
+# --- ANA SAYFA TASARIMI ---
+st.title("DermoScan AI: Deri Kanseri Analiz Paneli")
+st.write("Sınav Değerlendirme Kriterlerine Uygun Teknik Altyapı")
+
+col1, col2 = st.columns([1, 1])
+
+with col1:
+    st.subheader("📷 Görüntü Yükleme")
+    # Kriter 18: Kullanılabilirlik
+    uploaded_file = st.file_uploader("Analiz edilecek fotoğrafı seçin...", type=["jpg", "png", "jpeg"])
     
-    sonuc_metni = LABELS[result_index]
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption='Yüklenen Görsel', use_container_width=True)
+        
+        # ANALİZ BUTONU
+        if st.button('🧠 ANALİZİ BAŞLAT', use_container_width=True):
+            with st.spinner('Model tahmin yürütüyor...'):
+                # 1. Ön İşleme (Kriter 6: Normalizasyon)
+                img = image.convert('RGB')
+                img = img.resize((224, 224))
+                img_array = np.array(img)
+                
+                # ResNetV2 preprocess_input mantığı (-1 ile 1 arası)
+                img_array = (img_array / 127.5) - 1.0 
+                img_array = np.expand_dims(img_array, axis=0)
+                
+                # 2. Tahmin (Kriter 13: Sonuçların Sunumu)
+                preds = model.predict(img_array)
+                idx = np.argmax(preds)
+                confidence = preds[0][idx] * 100
+                
+                # SONUÇ EKRANI
+                res = LABELS[idx]
+                st.success("Analiz Tamamlandı!")
+                st.markdown(f"### Sonuç: :{res['color']}[{res['text']}]")
+                st.metric(label="Güven Oranı", value=f"%{confidence:.2f}")
+
+with col2:
+    st.subheader("📊 Model Performans Metrikleri")
+    # Kriter 15-16: Grafiklerin Kullanımı ve Kalitesi
+    # Bu dosyaların static/images içinde olduğundan emin ol
+    tab1, tab2, tab3 = st.tabs(["Doğruluk", "Matris", "ROC Eğrisi"])
     
-    # Bootstrap renklerini belirle
-    if result_index == 1: 
-        renk = "danger"
-    elif result_index == 0: 
-        renk = "success"
-    else: 
-        renk = "primary"
+    with tab1:
+        st.image("static/images/accuracy.png", caption="Eğitim vs Doğruluk (Accuracy)")
+        st.caption("**Kriter 14 Yorumu:** Eğitim ve test başarılarının paralelliği modelin genelleme yeteneğini gösterir.")
+        
+    with tab2:
+        st.image("static/images/matrix.png", caption="Karmaşıklık Matrisi (Confusion Matrix)")
+        
+    with tab3:
+        st.image("static/images/roc_curve.png", caption="ROC Eğrisi (Hassasiyet)")
 
-    # HTML'de hem metin hem de saf yüzde değeri kullanabilmek için tuple dönüyoruz
-    return sonuc_metni, f"%{confidence_value:.2f}", renk
-
-# --- ANA ROTA ---
-@app.route('/', methods=['GET', 'POST'])
-def home():
-    prediction = None
-    probability = None
-    image_loc = None
-    color = None
-    scroll_to_result = False
-
-    if request.method == 'POST':
-        f = request.files.get('file')
-        if f:
-            # Güvenli dosya ismi ve kaydetme
-            filename = secure_filename(f.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            f.save(file_path)
-            
-            # Analiz fonksiyonunu çağır
-            prediction, probability, color = model_predict(file_path, model)
-            
-            # Statik klasöründeki yolu HTML'e uygun hale getir
-            image_loc = file_path.replace('\\', '/') 
-            scroll_to_result = True 
-
-    return render_template('index.html', 
-                           prediction=prediction, 
-                           probability=probability, 
-                           image_loc=image_loc,
-                           color=color,
-                           scroll_to_result=scroll_to_result)
-
-if __name__ == '__main__':
-    # Render için portu dinamik olarak alıyoruz, yerelde 5000 kullanılır
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+st.divider()
+# Kriter 20: Sonuç ve Bütünlük
+st.write("**Teknik Not:** Bu sistem bir karar destek mekanizmasıdır. Kesin teşhis için uzman doktor onayı gereklidir.")
