@@ -4,141 +4,112 @@ from PIL import Image
 import numpy as np
 import os
 
-# --- 17 & 18. KRİTER: Sayfa Düzeni ve Navigasyon ---
+# --- 17 & 18. KRİTER: Sayfa Düzeni ve Görsel Standartlar ---
 st.set_page_config(
-    page_title="DermoScan AI | Teşhis Destek Sistemi",
+    page_title="DermoScan AI | Deri Lezyonu Analizi",
     page_icon="🔬",
     layout="wide"
 )
 
-# --- 11. KRİTER: Model Yükleme ve Eğitim Süreci ---
+# --- 11. KRİTER: Model Yükleme ---
 @st.cache_resource
 def load_my_model():
-    # Kriter 9: Model mimarisi ResNet50V2 tabanlıdır.
     model_path = 'final_model_3class.keras'
     return tf.keras.models.load_model(model_path, compile=False)
 
 try:
     model = load_my_model()
 except Exception:
-    st.error("Model dosyası yüklenemedi! Lütfen 'final_model_3class.keras' dosyasını kontrol edin.")
+    st.error("Model dosyası yüklenemedi! Lütfen dosya adını kontrol edin.")
 
-# --- SIDEBAR: 1, 2, 3, 4, 5, 8, 10. KRİTERLER (Akademik Tanımlamalar) ---
+# --- SIDEBAR: AKADEMİK BİLGİ VE NAVİGASYON ---
 with st.sidebar:
-    st.title("🔬 Proje Dokümantasyonu")
-    
-    # Navigasyon Menüsü (Kriter 18)
-    page = st.sidebar.radio("Bölümler", ["🏠 Tanı Paneli", "📊 Teknik Analiz & Grafikler", "📚 Proje Detayları"])
+    st.title("🔬 DermoScan AI")
+    st.markdown("---")
+    page = st.sidebar.radio("Menü Paneli", ["🏠 Lezyon Analizi", "📊 Model Performansı", "📖 Proje Detayları"])
     
     st.divider()
-    # Kriter 2: Proje Amacı
     st.subheader("🎯 Proje Amacı")
-    st.caption("Deri lezyonlarının erken teşhisinde derin öğrenme tabanlı bir karar destek mekanizması sunmak.")
-    
-    # Kriter 10: Hiperparametreler
-    st.subheader("⚙️ Eğitim Parametreleri")
-    st.code("""
-Epoch: 10
-Batch Size: 32
-Optimizer: Adam (1e-4)
-Loss: Categorical Crossentropy
-    """)
-    st.write("---")
-    st.caption("© 2026 Akademik Sunum Sistemi")
+    st.info("Vücuttaki nevüslerin (benlerin) dermatoskopik görüntüler üzerinden iyi huylu (benign) veya kötü huylu (malign) ayrımını yaparak erken teşhise destek olmak.")
 
-# --- 1. BÖLÜM: TANI PANELİ (Kriter 13, 18, 19) ---
-if page == "🏠 Tanı Paneli":
-    st.title("🔍 Akıllı Lezyon Analiz Sistemi")
-    st.write("Analiz için bir fotoğraf yüklediğinizde sistem otomatik olarak sınıflandırma yapacaktır.")
+# --- 1. BÖLÜM: LEZYON ANALİZİ ---
+if page == "🏠 Lezyon Analizi":
+    st.title("🔍 Otomatik Ben Analiz Sistemi")
+    st.write("Analiz için bir ben fotoğrafı yükleyin. Sistem, malign (riskli) ve benign (zararsız) ayrımını yapacaktır.")
     
-    # Kriter 18 & 19: Kullanılabilirlik ve Teknik Çalışırlık
-    uploaded_file = st.file_uploader("Dermatoskopik Görsel Seçin...", type=["jpg", "png", "jpeg"])
+    uploaded_file = st.file_uploader("Görsel Seçin (JPG, PNG, JPEG)", type=["jpg", "png", "jpeg"])
     
     if uploaded_file is not None:
-        col1, col2 = st.columns([1, 1])
+        # Sütun yapısı ile resim boyutunu sınırlandırıyoruz (Kriter 17)
+        col1, col2 = st.columns([1, 1.5]) 
         image = Image.open(uploaded_file)
         
         with col1:
-            st.image(image, caption='Yüklenen Görsel', width=500)
+            # Resim genişliğini 350px ile sınırladık, çok büyük görünmesini engelledik
+            st.image(image, caption='Analiz Edilen Ben Görseli', width=350)
             
         with col2:
-            with st.spinner('🧠 ResNet50V2 öznitelikleri işliyor...'):
-                # Kriter 6: Veri Ön İşleme (Resize & Normalization)
+            with st.spinner('🧠 Derin öğrenme modeli analiz yürütüyor...'):
+                # Kriter 6: Veri Ön İşleme
                 img = image.convert('RGB').resize((224, 224))
                 img_array = (np.array(img) / 127.5) - 1.0 
                 img_array = np.expand_dims(img_array, axis=0)
                 
-                # Kriter 13: Performans Sonuçlarının Sunumu
+                # Kriter 13: Tahmin Sunumu
                 preds = model.predict(img_array)
                 idx = np.argmax(preds)
                 confidence = preds[0][idx] * 100
                 
+                # Projeye Özel Etiketler
                 LABELS = {
-                    0: {"t": "BENIGN (İyi Huylu Lezyon)", "c": "green", "desc": "Lezyon düşük riskli görünmektedir."},
-                    1: {"t": "MALIGNANT (Kötü Huylu / Riskli)", "c": "red", "desc": "Yüksek risk saptanmıştır, uzman onayı gereklidir!"},
-                    2: {"t": "NORMAL DERİ / LEZYON YOK", "c": "gray", "desc": "Herhangi bir patolojik bulguya rastlanmadı."}
+                    0: {"t": "BENIGN (İyi Huylu / Zararsız)", "c": "green", "info": "Lezyon tipik özellikler göstermektedir, düşük riskli kategorisindedir."},
+                    1: {"t": "MALIGNANT (Kötü Huylu / Riskli)", "c": "red", "info": "Lezyon atipik özellikler göstermektedir. Acilen uzman bir dermatoloğa danışılmalıdır!"},
+                    2: {"t": "NORMAL DERİ / DİĞER", "c": "gray", "info": "Belirgin bir pigmente lezyon saptanmadı."}
                 }
                 
                 res = LABELS[idx]
-                st.markdown(f"### Sonuç: :{res['c']}[{res['t']}]")
-                st.metric(label="Tahmin Doğruluğu", value=f"%{confidence:.2f}")
-                
-                # Kriter 14: Sonuçların Teknik Yorumlanması
-                st.info(f"**Teknik Yorum:** Model, {confidence:.2f}% güven oranıyla bu örneği sınıflandırmıştır. {res['desc']}")
+                st.markdown(f"### Teşhis Tahmini: :{res['c']}[{res['t']}]")
+                st.metric(label="Tahmin Güven Oranı", value=f"%{confidence:.2f}")
+                st.warning(f"**Sistem Notu:** {res['info']}")
 
-# --- 2. BÖLÜM: TEKNİK ANALİZ (Kriter 12, 14, 15, 16) ---
-elif page == "📊 Teknik Analiz & Grafikler":
-    st.title("📈 Model Performans Metrikleri")
-    st.write("Eğitim sürecinde elde edilen akademik başarı göstergeleri aşağıdadır.")
+# --- 2. BÖLÜM: MODEL PERFORMANSI ---
+elif page == "📊 Model Performansı":
+    st.title("📈 Teknik Başarı Metrikleri")
     
-    # Kriter 15 & 16: Grafiklerin Kullanımı ve Kalitesi
+    # Grafik boyutlarını yan yana sütunlarla sınırlıyoruz (Kriter 16)
     c1, c2 = st.columns(2)
     with c1:
-        st.subheader("Doğruluk & Kayıp (Accuracy-Loss)")
+        st.subheader("Eğitim Süreci (Accuracy/Loss)")
         st.image("static/images/accuracy.png", use_container_width=True)
-        st.caption("**Kriter 14:** Eğitim ve doğrulama eğrilerinin paralelliği, genelleme yeteneğinin yüksek olduğunu (Low Overfitting) kanıtlar.")
         
     with c2:
-        st.subheader("Karmaşıklık Matrisi (Confusion Matrix)")
+        st.subheader("Hata Matrisi (Confusion Matrix)")
         st.image("static/images/matrix.png", use_container_width=True)
-        st.caption("**Kriter 12:** Sınıflar arası ayrım gücü metriklerle doğrulanmıştır.")
 
     st.divider()
-    st.subheader("Hassasiyet Eğrisi (ROC Curve)")
-    st.image("static/images/roc_curve.png", width=700)
-    st.write("**AUC Analizi:** Modelin duyarlılık ve özgüllük dengesi akademik standartlara uygundur.")
+    # ROC Eğrisi çok büyük göründüğü için width=500 ile sabitledik
+    st.subheader("Hassasiyet Analizi (ROC Curve)")
+    st.image("static/images/roc_curve.png", width=550)
+    st.write("**Teknik Analiz:** Modelin malign vakaları yakalama hassasiyeti (sensitivity) ROC eğrisi ile doğrulanmıştır.")
 
-# --- 3. BÖLÜM: PROJE DETAYLARI (Kriter 1, 3, 4, 5, 8, 20) ---
-elif page == "📚 Proje Detayları":
-    st.title("📖 Akademik Rapor Özeti")
+# --- 3. BÖLÜM: PROJE DETAYLARI ---
+elif page == "📖 Proje Detayları":
+    st.title("📚 Akademik Proje Özeti")
     
-    # Kriter 1 & 3: Problem ve Önem
-    st.markdown("### 1. Problem Tanımı ve Önem")
-    st.write("""
-    Deri kanserinin erken evrede teşhisi hayatta kalma oranlarını %90'ın üzerine çıkarmaktadır. 
-    Bu çalışma, uzman doktorlara hızlı ve güvenilir bir ön teşhis desteği sunmayı hedefler.
-    """)
+    st.markdown("""
+    ### 1. Problem ve Önem (Kriter 1-3)
+    Malign melanom gibi kötü huylu deri kanserleri, erken teşhis edildiğinde tedavi edilebilirliği çok yüksek hastalıklardır. 
+    Bu proje, nevüslerin görsel analizini yaparak kullanıcıyı ve hekimi olası risklere karşı uyarmayı amaçlar.
+
+    ### 2. Teknik Altyapı (Kriter 8-10)
+    * **Model:** ResNet50V2 (Transfer Learning)
+    * **Veri Seti:** HAM10000 (Deri Kanseri Görsel Veri Seti)
+    * **Yöntem:** Görüntü Sınıflandırma (3 Sınıf: Benign, Malignant, Normal)
     
-    # Kriter 4 & 5: Veri Seti
-    st.markdown("### 2. Veri Seti Tanıtımı")
-    st.write("""
-    **Kaynak:** Kaggle / HAM10000 tabanlı dermatoskopik veri seti.
-    **İçerik:** 3 ana sınıf, toplam 4.000+ görsel, 224x224 RGB formatı.
-    """)
-    
-    # Kriter 8 & 9: Model Seçimi
-    st.markdown("### 3. Model Mimarisi (ResNet50V2)")
-    st.write("""
-    **Gerekçe:** ResNet50V2, 'Residual Learning' yapısı sayesinde derin ağlarda yaşanan gradyan kaybolması 
-    sorununu çözer ve Transfer Learning ile tıbbi görüntülerde yüksek başarı sergiler.
+    ### 3. Kullanılan Parametreler
+    Eğitim sürecinde **Adam Optimizer** kullanılmış ve **Categorical Crossentropy** kaybı ile 10 epoch üzerinden optimizasyon sağlanmıştır.
     """)
 
-    # Kriter 20: Kaynakça
-    st.divider()
-    st.markdown("### 📚 Kaynakça")
-    st.caption("1. He, K. et al. (2016). Deep Residual Learning for Image Recognition.")
-    st.caption("2. HAM10000 Dataset: 'A large guide to skin cancer classification'.")
-
-# --- GENEL FOOTER ---
+# --- FOOTER ---
 st.divider()
-st.caption("Akademik Sınav Değerlendirme Projesi | 2026 | ")
+st.caption("Bu çalışma akademik amaçlı bir 'Ben Teşhis Destek Sistemi' prototipidir. Tıbbi tavsiye yerine geçmez.")
