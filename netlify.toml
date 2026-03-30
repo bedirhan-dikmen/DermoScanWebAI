@@ -4,9 +4,6 @@
 
 [[redirects]]
   from = "/*"
-  to = "/templates/index.html"
+  to = "/index.html"
   status = 200
 
-[functions]
-  external_node_modules = ["express"]
-  node_bundler = "esbuild"
