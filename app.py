@@ -104,7 +104,7 @@ elif page == "📖 Proje Detayları":
     ### 2. Veri Seti Bilgileri
     * **Kaynak:** [Kaggle - Skin Cancer: Malignant vs. Benign](https://www.kaggle.com/datasets/fanconic/skin-cancer-malignant-vs-benign)
     * **Format:** Veriler, doğrudan ham **.jpg** formatında görüntülerden oluşmaktadır.
-    * **İçerik:** Toplam 3297 adet dermatoskopik görüntü (1500 Benign, 1500 Malignant,1000 Normal) kullanılmıştır.
+    * **İçerik:** Toplam 4500 adet dermatoskopik görüntü (1500 Benign, 1500 Malignant,1000 Normal) kullanılmıştır.
     * **Ön İşleme:** Görüntüler model girişine uygun olarak 224x224 boyutuna getirilmiş ve piksel değerleri normalize edilmiştir.
 
     ### 3. Teknik Mimari
@@ -115,8 +115,10 @@ elif page == "📖 Proje Detayları":
     st.divider()
     st.markdown("### 📚 Kaynakça")
     st.write("1. Kaggle Dataset: [Skin Cancer: Malignant vs. Benign by Claudio Fanconi](https://www.kaggle.com/datasets/fanconic/skin-cancer-malignant-vs-benign)")
-    st.write("2. He, K., et al. 'Identity Mappings in Deep Residual Networks' (ResNet50V2 Reference).")
-
+    st.write("2. **Veri Seti:** Fanconi, C. Skin Cancer: Malignant vs. Benign. Kaggle (2019).")
+    st.write("3. **Mimari:** He, K. et al. Deep Residual Learning for Image Recognition. CVPR (2016).")
+    st.write("4. **Tıbbi Referans:** Esteva, A. et al. Dermatologist-level classification of skin cancer with deep neural networks. Nature (2017).")
+    st.write("5. **Kütüphane:** TensorFlow & Keras Documentation (2026).")
 # --- FOOTER ---
 st.divider()
 st.caption("Bu çalışma akademik amaçlı bir 'Ben Teşhis Destek Sistemi' prototipidir. Tıbbi tavsiye yerine geçmez.")
