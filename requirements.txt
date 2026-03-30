@@ -1,4 +1,4 @@
-flask
-tensorflow-cpu
-numpy
-werkzeug
+flask==3.0.0
+tensorflow==2.15.0
+numpy<2.0.0
+werkzeug==3.0.1
