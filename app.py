@@ -59,7 +59,7 @@ if page == "🏠 Tanı Paneli":
         image = Image.open(uploaded_file)
         
         with col1:
-            st.image(image, caption='Yüklenen Görsel', width=350)
+            st.image(image, caption='Yüklenen Görsel', width=500)
             
         with col2:
             with st.spinner('🧠 ResNet50V2 öznitelikleri işliyor...'):
