@@ -1,4 +1,10 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+import tensorflow as tf
+# RAM tasarrufu için optimizasyon
+tf.config.set_visible_devices([], 'GPU')
 import numpy as np
 from flask import Flask, render_template, request
 from tensorflow.keras.models import load_model
