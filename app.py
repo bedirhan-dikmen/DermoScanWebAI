@@ -105,7 +105,7 @@ elif page == "📊 Teknik Analiz & Grafikler":
 
     st.divider()
     st.subheader("Hassasiyet Eğrisi (ROC Curve)")
-    st.image("static/images/roc_curve.png", use_container_width=True)
+    st.image("static/images/roc_curve.png", width=500)
     st.write("**AUC Analizi:** Modelin duyarlılık ve özgüllük dengesi akademik standartlara uygundur.")
 
 # --- 3. BÖLÜM: PROJE DETAYLARI (Kriter 1, 3, 4, 5, 8, 20) ---
@@ -123,7 +123,7 @@ elif page == "📚 Proje Detayları":
     st.markdown("### 2. Veri Seti Tanıtımı")
     st.write("""
     **Kaynak:** Kaggle / HAM10000 tabanlı dermatoskopik veri seti.
-    **İçerik:** 3 ana sınıf, toplam 10.000+ görsel, 224x224 RGB formatı.
+    **İçerik:** 3 ana sınıf, toplam 4.000+ görsel, 224x224 RGB formatı.
     """)
     
     # Kriter 8 & 9: Model Seçimi
