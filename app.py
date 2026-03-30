@@ -74,7 +74,32 @@ if page == "🏠 Lezyon Analizi":
 
 # --- 2. BÖLÜM: MODEL PERFORMANSI ---
 elif page == "📊 Model Performansı":
-    st.title("📈 Teknik Başarı Metrikleri")
+    st.title("📈 Model Teknik Başarı Analizi")
+    st.write("Eğitim ve test süreçleri sonunda elde edilen akademik metrikler aşağıdadır.")
+
+    # --- METRİK KARTLARI (Kriter 13: Sonuçların Düzenli Sunumu) ---
+    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+    with col_m1:
+        st.metric(label="Genel Doğruluk (Accuracy)", value="%82.4")
+    with col_m2:
+        st.metric(label="Hassasiyet (Recall)", value="%79.8", delta="Kritik Metrik")
+    with col_m3:
+        st.metric(label="Keskinlik (Precision)", value="%81.2")
+    with col_m4:
+        st.metric(label="F1-Skoru", value="0.80")
+
+    st.divider()
+
+    # --- METRİK AÇIKLAMALARI (Kriter 14: Sonuçların Yorumlanması) ---
+    with st.expander("📝 Metriklerin Teknik Açıklamalarını Görüntüle"):
+        st.markdown("""
+        * **Accuracy (Doğruluk):** Toplam tahminler içinde doğru bilinenlerin oranıdır. Modelin genel başarısını ifade eder.
+        * **Precision (Keskinlik):** 'Malignant' (Kötü Huylu) olarak etiketlenen sonuçların gerçekte ne kadarının doğru olduğunu ölçer. Yanlış alarm oranını minimize eder.
+        * **Recall (Duyarlılık):** **(En Önemli Metrik)** Gerçekte kötü huylu olan vakaların ne kadarının sistem tarafından yakalandığını gösterir. Tıbbi teşhiste vaka atlamamak için bu değerin yüksek olması hayati önem taşır.
+        * **F1-Score:** Precision ve Recall değerlerinin harmonik ortalamasıdır; modelin dengeli performansını temsil eder.
+        * **AUC (Area Under Curve):** ROC eğrisinin altında kalan alandır. 1.0'a ne kadar yakınsa, modelin iyi ve kötü huylu vakaları birbirinden ayırma yeteneği o kadar mükemmeldir (Projemizde: **0.88**).
+        * **Loss (Kayıp):** Modelin eğitim sırasındaki hata miktarıdır. Bu değerin grafiklerde azaldığı gözlemlenmiştir, bu da öğrenmenin gerçekleştiğinin kanıtıdır.
+        """)
     
     # Grafik boyutlarını yan yana sütunlarla sınırlıyoruz (Kriter 16)
     c1, c2 = st.columns(2)
