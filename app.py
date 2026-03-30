@@ -105,7 +105,7 @@ elif page == "📊 Teknik Analiz & Grafikler":
 
     st.divider()
     st.subheader("Hassasiyet Eğrisi (ROC Curve)")
-    st.image("static/images/roc_curve.png", width=500)
+    st.image("static/images/roc_curve.png", width=700)
     st.write("**AUC Analizi:** Modelin duyarlılık ve özgüllük dengesi akademik standartlara uygundur.")
 
 # --- 3. BÖLÜM: PROJE DETAYLARI (Kriter 1, 3, 4, 5, 8, 20) ---
