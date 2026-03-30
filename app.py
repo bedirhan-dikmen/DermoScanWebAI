@@ -102,9 +102,8 @@ elif page == "📖 Proje Detayları":
     ayırarak erken teşhis sürecine teknolojik destek sağlamayı amaçlar.
 
     ### 2. Veri Seti Bilgileri
-    * **Kaynak:** [Kaggle - Skin Cancer: Malignant vs. Benign](https://www.kaggle.com/datasets/fanconic/skin-cancer-malignant-vs-benign)
     * **Format:** Veriler, doğrudan ham **.jpg** formatında görüntülerden oluşmaktadır.
-    * **İçerik:** Toplam 4500 adet dermatoskopik görüntü (1500 Benign, 1500 Malignant,1000 Normal) kullanılmıştır.
+    * **İçerik:** Toplam 4000 adet dermatoskopik görüntü (1500 Benign, 1500 Malignant,1000 Normal) kullanılmıştır.
     * **Ön İşleme:** Görüntüler model girişine uygun olarak 224x224 boyutuna getirilmiş ve piksel değerleri normalize edilmiştir.
 
     ### 3. Teknik Mimari
