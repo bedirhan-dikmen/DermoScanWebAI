@@ -97,23 +97,23 @@ elif page == "📖 Proje Detayları":
     st.title("📖 Akademik Proje Özeti")
     
     st.markdown(f"""
-    ### 1. Problem Tanımı ve Önem (Kriter 1-3)
+    ### 1. Problem Tanımı ve Önem
     Deri lezyonlarının erken teşhisi hayati önem taşır. Bu proje, iyi huylu (benign) ve kötü huylu (malignant) benleri 
     ayırarak erken teşhis sürecine teknolojik destek sağlamayı amaçlar.
 
-    ### 2. Veri Seti Bilgileri (Kriter 4-5)
+    ### 2. Veri Seti Bilgileri
     * **Kaynak:** [Kaggle - Skin Cancer: Malignant vs. Benign](https://www.kaggle.com/datasets/fanconic/skin-cancer-malignant-vs-benign)
     * **Format:** Veriler, doğrudan ham **.jpg** formatında görüntülerden oluşmaktadır.
-    * **İçerik:** Toplam 3297 adet dermatoskopik görüntü (1800 Benign, 1497 Malignant) kullanılmıştır.
+    * **İçerik:** Toplam 3297 adet dermatoskopik görüntü (1500 Benign, 1500 Malignant,1000 Normal) kullanılmıştır.
     * **Ön İşleme:** Görüntüler model girişine uygun olarak 224x224 boyutuna getirilmiş ve piksel değerleri normalize edilmiştir.
 
-    ### 3. Teknik Mimari (Kriter 8-10)
+    ### 3. Teknik Mimari
     * **Model:** ResNet50V2 (Transfer Learning)
     * **Hiperparametreler:** Adam Optimizer, 1e-4 Learning Rate, 10 Epoch.
     """)
     
     st.divider()
-    st.markdown("### 📚 Kaynakça (Kriter 20)")
+    st.markdown("### 📚 Kaynakça")
     st.write("1. Kaggle Dataset: [Skin Cancer: Malignant vs. Benign by Claudio Fanconi](https://www.kaggle.com/datasets/fanconic/skin-cancer-malignant-vs-benign)")
     st.write("2. He, K., et al. 'Identity Mappings in Deep Residual Networks' (ResNet50V2 Reference).")
 
